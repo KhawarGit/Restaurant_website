@@ -1,0 +1,44 @@
+# ---- dependencies ----
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# ---- next.js ----
+/.next/
+/out/
+/build
+next-env.d.ts
+
+# ---- local data store (auto-seeded at runtime) ----
+/.data/
+
+# ---- env files (NEVER commit secrets) ----
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+# keep the template committed:
+!.env.example
+
+# ---- testing / coverage ----
+/coverage
+
+# ---- misc ----
+*.pem
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ---- editors / OS ----
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+Thumbs.db
+
+# ---- vercel ----
+.vercel
