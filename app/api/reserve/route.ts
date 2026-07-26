@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { addReservation, addNotification, updateTable, uid } from "@/lib/db";
+import { addReservation, addNotification, updateTable, uid, hydrate, flush } from "@/lib/db";
 import { allocateTable, reservationSummary } from "@/lib/allocate";
 import { managerWaLink, sendWhatsApp } from "@/lib/notify";
 import { site } from "@/lib/site";
@@ -44,6 +44,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, errors }, { status: 422 });
   }
 
+  await hydrate();
+
   const partySize = parseInt(String(guests).replace(/\D/g, ""), 10) || 2;
   const seating = (["indoor", "garden"].includes(String(data.seating))
     ? data.seating
@@ -87,6 +89,8 @@ export async function POST(request: Request) {
     read: false,
     createdAt: Date.now(),
   });
+
+  await flush();
 
   // Attempt automatic send (no-op unless WhatsApp API env vars are configured).
   await sendWhatsApp(message);

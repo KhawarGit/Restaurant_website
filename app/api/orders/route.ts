@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db, addOrder, addNotification, updateTable, uid, orderCode } from "@/lib/db";
+import { db, addOrder, addNotification, updateTable, uid, orderCode, hydrate, flush } from "@/lib/db";
 import { currentRole } from "@/lib/auth";
 import { managerWaLink, sendWhatsApp } from "@/lib/notify";
 import { site } from "@/lib/site";
@@ -9,12 +9,14 @@ const TAX_RATE = 0.13;
 
 export async function GET() {
   if (!currentRole()) return NextResponse.json({ ok: false }, { status: 401 });
+  await hydrate();
   return NextResponse.json({ ok: true, orders: db().orders });
 }
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   if (!body) return NextResponse.json({ ok: false, error: "Invalid request." }, { status: 400 });
+  await hydrate();
 
   const type = (["dine-in", "takeaway", "delivery"].includes(body.type) ? body.type : "dine-in") as OrderType;
   const rawItems = Array.isArray(body.items) ? body.items : [];
@@ -102,6 +104,7 @@ export async function POST(request: Request) {
     createdAt: Date.now(),
   });
 
+  await flush();
   await sendWhatsApp(message);
 
   return NextResponse.json({ ok: true, order, waLink });

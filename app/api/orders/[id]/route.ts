@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db, updateOrder, updateTable } from "@/lib/db";
+import { db, updateOrder, updateTable, hydrate, flush } from "@/lib/db";
 import { currentRole } from "@/lib/auth";
 import type { OrderStatus, PaymentStatus } from "@/lib/types";
 
@@ -10,6 +10,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     paymentStatus?: PaymentStatus;
   };
 
+  await hydrate();
   const order = db().orders.find((o) => o.id === params.id);
   if (!order) return NextResponse.json({ ok: false, error: "Not found" }, { status: 404 });
 
@@ -24,5 +25,6 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     updateTable(order.tableId, { status: "free" });
   }
 
+  await flush();
   return NextResponse.json({ ok: true, order: updated });
 }

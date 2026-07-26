@@ -64,13 +64,13 @@ This is a standard Next.js 14 app — Vercel needs **zero build configuration**.
    - Framework preset is auto-detected as **Next.js**.
    - Build command `next build` and output are set automatically — **leave defaults**.
 
-3. **Add environment variables** *(optional — skip if you don't need auto-WhatsApp)*
-   - In the import screen (or later under **Project → Settings → Environment
-     Variables**), add any keys from [`.env.example`](.env.example):
-     - `WHATSAPP_API_URL`
-     - `WHATSAPP_TOKEN`
-   - Set them for the **Production** (and optionally Preview) environment, then
-     redeploy so they take effect.
+3. **Add environment variables** *(all optional — the app runs without them)*
+   - For **persistent data**, connect Upstash Redis — see
+     [Data persistence](#-data-persistence--enable-free-redis-recommended) below
+     (it sets `KV_REST_API_URL` / `KV_REST_API_TOKEN` for you).
+   - For **auto-WhatsApp**, add `WHATSAPP_API_URL` + `WHATSAPP_TOKEN`.
+   - Set them under **Project → Settings → Environment Variables** for the
+     **Production** (and optionally Preview) environment, then redeploy.
 
 4. **Deploy** — click **Deploy**. Your site goes live at
    `https://<project>.vercel.app`. The dashboards are at `/staff`.
@@ -87,24 +87,32 @@ This is a standard Next.js 14 app — Vercel needs **zero build configuration**.
 
 ---
 
-## ⚠️ Important: data persistence on Vercel
+## 💾 Data persistence — enable free Redis (recommended)
 
-The demo stores data in a local file (`.data/db.json`). **Vercel's serverless
-filesystem is read-only**, so on Vercel the store automatically falls back to
-**in-memory** storage. What this means:
+The app has **two storage modes**, chosen automatically:
 
-- ✅ The site, ordering, reservations and dashboards **all work** for a live demo.
-- ⚠️ Data is **not durable** — it resets on cold starts and isn't shared between
-  serverless instances, so what you add may seem to "disappear" later.
+| Mode | When | Behaviour |
+|------|------|-----------|
+| **Local file** | dev, no Redis env vars | Saves to `.data/db.json` |
+| **In-memory** | Vercel, no Redis env vars | Works, but **resets on cold starts** (Vercel's FS is read-only) |
+| **Redis (durable)** | Redis env vars present | ✅ Persists everywhere, shared across all instances |
 
-**That's fine for a portfolio demo.** For real, persistent data, connect a
-database and back the helpers in [`lib/db.ts`](lib/db.ts) with it. Easiest options:
+For a real deployment, connect **Upstash for Redis** — it has a **free tier**
+(~10k commands/day, 256 MB) and integrates natively with Vercel.
 
-- **Vercel KV** (Redis) or **Vercel Postgres** — first-party, a few lines of setup.
-- **Supabase / Neon / PlanetScale** — free-tier Postgres/MySQL.
+### Enable it (free, ~2 minutes)
 
-The API routes and dashboards don't need to change — only the storage functions
-inside `lib/db.ts` do.
+1. In your Vercel project, go to the **Storage** tab → **Create Database** →
+   **Upstash for Redis** (in the Marketplace) → pick the **Free** plan.
+   *(Or create one at [upstash.com](https://upstash.com) and copy its REST URL + token.)*
+2. **Connect it to the project.** Vercel automatically injects the
+   `KV_REST_API_URL` and `KV_REST_API_TOKEN` environment variables.
+3. **Redeploy.** That's it — the app detects the vars and switches to Redis. All
+   orders, reservations, tables and feedback now persist durably.
+
+> No code changes needed. The switch is handled in [`lib/db.ts`](lib/db.ts),
+> which reads either `KV_REST_API_*` (Vercel) or `UPSTASH_REDIS_REST_*` (Upstash
+> direct). To test durability locally, put the same vars in `.env.local`.
 
 ---
 

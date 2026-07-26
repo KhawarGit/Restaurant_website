@@ -59,7 +59,7 @@ and live manager / waiter / chef dashboards.**
 | Styling | **Tailwind CSS** + custom design tokens |
 | Fonts | Playfair Display + Inter (`next/font`) |
 | State | React hooks (`useCart`, `usePoll` polling) |
-| Persistence | File-backed JSON store (swap-ready for Postgres/Prisma, Supabase, etc.) |
+| Persistence | Upstash/Vercel KV Redis when configured, else local JSON file / in-memory |
 | Auth | Role-based PIN + HTTP-only cookie |
 
 No external UI or database dependencies — everything runs with a single `npm install`.
@@ -199,11 +199,14 @@ Deploys to **Vercel** out of the box:
 
 1. Push this repo to GitHub.
 2. Import it on [vercel.com](https://vercel.com/new).
-3. Add any env vars, then deploy.
+3. Deploy — no configuration needed.
 
-> ⚠️ The demo persists data to a local JSON file, which is ephemeral on
-> serverless platforms. For production, connect a real database (Postgres +
-> Prisma, Supabase, PlanetScale, …) behind the existing `lib/db.ts` helpers.
+> 💾 **For persistent data**, connect **Upstash for Redis** (Vercel Storage tab →
+> Marketplace → Free plan). It injects `KV_REST_API_URL` / `KV_REST_API_TOKEN` and
+> the app switches to durable Redis automatically — no code changes.
+> Without it, data is in-memory on serverless (fine for a demo, resets on cold starts).
+>
+> 📘 Full step-by-step in **[DOCS.md](DOCS.md)** — dashboards, env vars & deployment.
 
 ---
 

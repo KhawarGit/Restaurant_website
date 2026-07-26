@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
-import { db, addFeedback, addNotification, uid } from "@/lib/db";
+import { db, addFeedback, addNotification, uid, hydrate, flush } from "@/lib/db";
 import { currentRole } from "@/lib/auth";
 import { managerWaLink } from "@/lib/notify";
 import type { Feedback } from "@/lib/types";
 
 export async function GET() {
   if (!currentRole()) return NextResponse.json({ ok: false }, { status: 401 });
+  await hydrate();
   const list = db().feedback;
   const avg =
     list.length > 0 ? list.reduce((s, f) => s + f.rating, 0) / list.length : 0;
@@ -15,6 +16,7 @@ export async function GET() {
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   if (!body) return NextResponse.json({ ok: false, error: "Invalid request." }, { status: 400 });
+  await hydrate();
 
   const rating = Math.max(1, Math.min(5, parseInt(body.rating, 10) || 0));
   if (!rating) return NextResponse.json({ ok: false, errors: { rating: "Please give a rating." } }, { status: 422 });
@@ -54,5 +56,6 @@ export async function POST(request: Request) {
     });
   }
 
+  await flush();
   return NextResponse.json({ ok: true, feedback: fb });
 }

@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { Redis } from "@upstash/redis";
 import type {
   DB,
   Table,
@@ -11,6 +12,7 @@ import type {
 
 const DATA_DIR = path.join(process.cwd(), ".data");
 const DB_FILE = path.join(DATA_DIR, "db.json");
+const REDIS_KEY = "kk:db";
 
 function seed(): DB {
   const tables: Table[] = [
@@ -28,10 +30,24 @@ function seed(): DB {
   return { tables, reservations: [], orders: [], feedback: [], notifications: [] };
 }
 
-// Cache across hot-reloads in dev via globalThis.
-const g = globalThis as unknown as { __kkdb?: DB };
+// Cache across hot-reloads / warm invocations via globalThis.
+const g = globalThis as unknown as { __kkdb?: DB; __kkredis?: Redis | null };
 
-function load(): DB {
+// ---- Storage backend selection ------------------------------------------
+// Uses Upstash/Vercel KV Redis when the REST env vars are present; otherwise
+// falls back to a local JSON file (dev) / in-memory (read-only filesystems).
+function getRedis(): Redis | null {
+  if (g.__kkredis !== undefined) return g.__kkredis;
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  g.__kkredis = url && token ? new Redis({ url, token }) : null;
+  return g.__kkredis;
+}
+
+export const usingRedis = () => getRedis() !== null;
+
+// ---- File helpers (local fallback) --------------------------------------
+function fileLoad(): DB {
   if (g.__kkdb) return g.__kkdb;
   try {
     if (fs.existsSync(DB_FILE)) {
@@ -42,25 +58,54 @@ function load(): DB {
     /* fall through to seed */
   }
   g.__kkdb = seed();
-  persist();
+  filePersist();
   return g.__kkdb!;
 }
 
-function persist() {
+function filePersist() {
   try {
     if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
     fs.writeFileSync(DB_FILE, JSON.stringify(g.__kkdb, null, 2));
   } catch {
-    /* best-effort; in-memory still works */
+    /* best-effort; in-memory still works (e.g. serverless read-only FS) */
   }
 }
 
-export function db(): DB {
-  return load();
+// ---- Public storage boundary --------------------------------------------
+/** Load the latest state into memory. Call once at the top of each request. */
+export async function hydrate(): Promise<DB> {
+  const redis = getRedis();
+  if (redis) {
+    const data = (await redis.get<DB>(REDIS_KEY)) ?? null;
+    if (data) {
+      g.__kkdb = data;
+    } else {
+      g.__kkdb = seed();
+      await redis.set(REDIS_KEY, g.__kkdb);
+    }
+    return g.__kkdb!;
+  }
+  return fileLoad();
 }
 
+/** Persist the current in-memory state. Call after any mutation. */
+export async function flush(): Promise<void> {
+  const redis = getRedis();
+  if (redis) {
+    await redis.set(REDIS_KEY, g.__kkdb);
+    return;
+  }
+  filePersist();
+}
+
+/** Synchronous accessor — assumes hydrate() has run for this request. */
+export function db(): DB {
+  return g.__kkdb ?? fileLoad();
+}
+
+/** Sync local persist used by the mutation helpers (no-op-safe on serverless). */
 export function commit() {
-  persist();
+  if (!getRedis()) filePersist();
 }
 
 export const uid = (p = "") =>
@@ -70,7 +115,7 @@ export function orderCode() {
   return "KK-" + Math.random().toString(36).slice(2, 6).toUpperCase();
 }
 
-// ---- Collection helpers -------------------------------------------------
+// ---- Collection helpers (mutate in-memory; route calls flush() after) ----
 
 export function addReservation(r: Reservation) {
   db().reservations.unshift(r);
@@ -92,7 +137,6 @@ export function addFeedback(f: Feedback) {
 
 export function addNotification(n: Notification) {
   db().notifications.unshift(n);
-  // keep the feed tidy
   db().notifications = db().notifications.slice(0, 60);
   commit();
   return n;

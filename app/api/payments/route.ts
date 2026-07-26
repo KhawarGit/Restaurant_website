@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db, updateOrder } from "@/lib/db";
+import { db, updateOrder, hydrate, flush } from "@/lib/db";
 import type { PaymentMethod } from "@/lib/types";
 
 /**
@@ -10,6 +10,7 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
   const { orderId, method } = body as { orderId?: string; method?: PaymentMethod };
 
+  await hydrate();
   const order = db().orders.find((o) => o.id === orderId);
   if (!order) return NextResponse.json({ ok: false, error: "Order not found." }, { status: 404 });
 
@@ -21,6 +22,7 @@ export async function POST(request: Request) {
   const updated = updateOrder(order.id, {
     payment: { method: pm, status: "paid" },
   });
+  await flush();
 
   return NextResponse.json({
     ok: true,
