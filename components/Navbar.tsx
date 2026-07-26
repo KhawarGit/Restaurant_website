@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { nav, site } from "@/lib/site";
 import { Logo } from "./Logo";
-import { Phone } from "./Icons";
+import { Phone, Lock } from "./Icons";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -54,6 +54,13 @@ export function Navbar() {
             <Phone className="h-4 w-4 text-gold-dark" />
             {site.phone}
           </a>
+          <Link
+            href="/staff"
+            className="inline-flex items-center gap-1.5 rounded-full border border-forest-800/20 px-4 py-2 text-sm font-medium text-forest-800 transition-colors hover:border-gold hover:text-gold-dark"
+          >
+            <Lock className="h-3.5 w-3.5" />
+            Staff
+          </Link>
           <Link href="/#reserve" className="btn-gold text-sm">
             Reserve a Table
           </Link>
@@ -101,6 +108,13 @@ export function Navbar() {
           </a>
           <Link href="/#reserve" onClick={() => setOpen(false)} className="btn-gold w-full">
             Reserve a Table
+          </Link>
+          <Link
+            href="/staff"
+            onClick={() => setOpen(false)}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-cream/25 py-3 text-sm font-medium text-cream/80 transition-colors hover:border-gold hover:text-gold"
+          >
+            <Lock className="h-4 w-4" /> Staff Login
           </Link>
         </div>
       </div>
