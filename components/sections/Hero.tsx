@@ -11,15 +11,15 @@ export function Hero() {
           className="absolute inset-0 animate-slow-zoom bg-cover bg-center"
           style={{
             backgroundImage:
-              "linear-gradient(0deg, rgba(4,26,20,0.92), rgba(7,42,32,0.55) 55%, rgba(4,26,20,0.7)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1900&q=80')",
+              "linear-gradient(0deg, rgb(var(--c-forest-950) / 0.92), rgb(var(--c-forest-900) / 0.55) 55%, rgb(var(--c-forest-950) / 0.7)), url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1900&q=80')",
           }}
         />
-        {/* palm silhouette pattern */}
+        {/* accent dot pattern */}
         <div
           className="absolute inset-0 opacity-[0.06]"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 20% 30%, #C8A24B 0, transparent 8%), radial-gradient(circle at 80% 70%, #C8A24B 0, transparent 8%)",
+              "radial-gradient(circle at 20% 30%, rgb(var(--c-gold)) 0, transparent 8%), radial-gradient(circle at 80% 70%, rgb(var(--c-gold)) 0, transparent 8%)",
             backgroundSize: "60px 60px",
           }}
         />

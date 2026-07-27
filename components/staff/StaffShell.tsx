@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { Role } from "@/lib/types";
+import { ThemeSwitcher } from "@/components/theme/ThemeSwitcher";
 
 const links: Record<Role, { label: string; href: string }[]> = {
   manager: [
@@ -78,6 +79,9 @@ export function StaffShell({
 
           <div className="flex items-center gap-2">
             {right}
+            <div className="hidden sm:block">
+              <ThemeSwitcher variant="dark" />
+            </div>
             <button
               onClick={logout}
               className="rounded-full border border-cream/15 px-4 py-1.5 text-sm text-cream/70 transition-colors hover:border-red-400/50 hover:text-red-300"

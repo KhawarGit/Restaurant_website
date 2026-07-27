@@ -10,7 +10,7 @@ export function Reserve() {
       className="relative scroll-mt-24 overflow-hidden bg-cover bg-center py-24 md:py-32"
       style={{
         backgroundImage:
-          "linear-gradient(rgba(4,26,20,0.92), rgba(4,26,20,0.94)), url('https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1600&q=80')",
+          "linear-gradient(rgb(var(--c-forest-950) / 0.92), rgb(var(--c-forest-950) / 0.94)), url('https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1600&q=80')",
       }}
     >
       <div className="container-x grid items-center gap-14 lg:grid-cols-2">

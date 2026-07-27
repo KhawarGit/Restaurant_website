@@ -26,6 +26,7 @@ and live manager / waiter / chef dashboards.**
 ## ✨ Highlights
 
 - 🎨 **Design-led marketing site** — animated hero, photo-spotlight interactive menu, gallery, testimonials, and a Google-Maps location.
+- 🎭 **4 switchable themes** — *Grove*, *Riviera*, *Saffron* & *Onyx* re-skin the entire site (palette + typography) in one click via a top-bar switcher; choice saved to `sessionStorage`.
 - 🧠 **Smart table allocation** — a rules engine assigns the best-fit table by party size, seating preference, and availability (with graceful waitlisting).
 - 🛎️ **Omnichannel ordering** — dine-in, takeaway & delivery in a single cart flow with tax and **online or cash payment**.
 - 📊 **Role-based staff console** — live, auto-refreshing dashboards for **Manager**, **Waiter**, and **Chef** (Kitchen Display System).

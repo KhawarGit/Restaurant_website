@@ -8,40 +8,42 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Tropical luxury palette
+        // Palette is driven by CSS variables so themes can re-skin the whole
+        // site at runtime (see globals.css [data-theme] blocks). Channels are
+        // space-separated RGB to support Tailwind's <alpha-value> opacity.
         forest: {
-          DEFAULT: "#0B3D2E",
-          50: "#eef6f1",
-          100: "#d3e7dc",
-          600: "#12513c",
-          700: "#0f4433",
-          800: "#0b3d2e",
-          900: "#072a20",
-          950: "#041a14",
+          DEFAULT: "rgb(var(--c-forest) / <alpha-value>)",
+          50: "rgb(var(--c-forest-50) / <alpha-value>)",
+          100: "rgb(var(--c-forest-100) / <alpha-value>)",
+          600: "rgb(var(--c-forest-600) / <alpha-value>)",
+          700: "rgb(var(--c-forest-700) / <alpha-value>)",
+          800: "rgb(var(--c-forest-800) / <alpha-value>)",
+          900: "rgb(var(--c-forest-900) / <alpha-value>)",
+          950: "rgb(var(--c-forest-950) / <alpha-value>)",
         },
         gold: {
-          DEFAULT: "#C8A24B",
-          light: "#E4C878",
-          dark: "#A6832F",
+          DEFAULT: "rgb(var(--c-gold) / <alpha-value>)",
+          light: "rgb(var(--c-gold-light) / <alpha-value>)",
+          dark: "rgb(var(--c-gold-dark) / <alpha-value>)",
         },
         cream: {
-          DEFAULT: "#F7F1E5",
-          dark: "#EFE6D2",
+          DEFAULT: "rgb(var(--c-cream) / <alpha-value>)",
+          dark: "rgb(var(--c-cream-dark) / <alpha-value>)",
         },
-        palm: "#1E6B4F",
-        sand: "#EAdfc9",
+        palm: "rgb(var(--c-palm) / <alpha-value>)",
+        sand: "rgb(var(--c-sand) / <alpha-value>)",
       },
       fontFamily: {
-        serif: ["var(--font-playfair)", "Georgia", "serif"],
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        serif: ["var(--font-display)", "Georgia", "serif"],
+        sans: ["var(--font-body)", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        luxe: "0 24px 60px -20px rgba(11, 61, 46, 0.45)",
-        gold: "0 10px 40px -12px rgba(200, 162, 75, 0.55)",
+        luxe: "0 24px 60px -20px rgb(var(--c-forest) / 0.45)",
+        gold: "0 10px 40px -12px rgb(var(--c-gold) / 0.55)",
       },
       backgroundImage: {
         "gold-sheen":
-          "linear-gradient(120deg, #A6832F 0%, #E4C878 45%, #C8A24B 100%)",
+          "linear-gradient(120deg, rgb(var(--c-gold-dark)) 0%, rgb(var(--c-gold-light)) 45%, rgb(var(--c-gold)) 100%)",
       },
       keyframes: {
         "fade-up": {

@@ -2,6 +2,117 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   THEMES — each redefines the palette + fonts so the whole
+   site (and staff console) re-skins via <html data-theme="…">.
+   RGB channels are space-separated for <alpha-value> support.
+   ============================================================ */
+
+/* Grove — Tropical Luxury (default) */
+:root,
+[data-theme="grove"] {
+  --c-forest: 11 61 46;
+  --c-forest-50: 238 246 241;
+  --c-forest-100: 211 231 220;
+  --c-forest-600: 18 81 60;
+  --c-forest-700: 15 68 51;
+  --c-forest-800: 11 61 46;
+  --c-forest-900: 7 42 32;
+  --c-forest-950: 4 26 20;
+  --c-gold: 200 162 75;
+  --c-gold-light: 228 200 120;
+  --c-gold-dark: 166 131 47;
+  --c-cream: 247 241 229;
+  --c-cream-dark: 239 230 210;
+  --c-palm: 30 107 79;
+  --c-sand: 234 223 201;
+
+  --font-display: var(--font-playfair);
+  --font-body: var(--font-inter);
+  --radius-btn: 9999px;
+  --heading-spacing: 0;
+  --eyebrow-transform: uppercase;
+  --body-texture: none;
+}
+
+/* Riviera — Coastal Mediterranean (navy + brass + ivory) */
+[data-theme="riviera"] {
+  --c-forest: 19 52 83;
+  --c-forest-50: 238 244 250;
+  --c-forest-100: 211 226 239;
+  --c-forest-600: 36 92 138;
+  --c-forest-700: 28 74 114;
+  --c-forest-800: 19 52 83;
+  --c-forest-900: 14 41 66;
+  --c-forest-950: 10 30 51;
+  --c-gold: 224 167 60;
+  --c-gold-light: 244 210 138;
+  --c-gold-dark: 180 124 30;
+  --c-cream: 244 241 234;
+  --c-cream-dark: 231 225 212;
+  --c-palm: 46 139 139;
+  --c-sand: 231 221 200;
+
+  --font-display: var(--font-cormorant);
+  --font-body: var(--font-jost);
+  --radius-btn: 0.35rem;
+  --heading-spacing: 0.01em;
+  --eyebrow-transform: uppercase;
+  --body-texture: none;
+}
+
+/* Saffron — Heritage Spice (maroon + saffron + warm sand) */
+[data-theme="saffron"] {
+  --c-forest: 94 36 26;
+  --c-forest-50: 246 238 232;
+  --c-forest-100: 234 217 206;
+  --c-forest-600: 150 68 47;
+  --c-forest-700: 122 51 35;
+  --c-forest-800: 94 36 26;
+  --c-forest-900: 74 27 20;
+  --c-forest-950: 58 20 16;
+  --c-gold: 232 165 25;
+  --c-gold-light: 246 206 106;
+  --c-gold-dark: 185 121 28;
+  --c-cream: 247 239 225;
+  --c-cream-dark: 239 226 204;
+  --c-palm: 173 96 47;
+  --c-sand: 236 219 195;
+
+  --font-display: var(--font-dmserif);
+  --font-body: var(--font-poppins);
+  --radius-btn: 9999px;
+  --heading-spacing: 0;
+  --eyebrow-transform: uppercase;
+  --body-texture: none;
+}
+
+/* Onyx — Modern Monochrome (charcoal + electric gold) */
+[data-theme="onyx"] {
+  --c-forest: 24 24 27;
+  --c-forest-50: 244 244 245;
+  --c-forest-100: 228 228 231;
+  --c-forest-600: 63 63 70;
+  --c-forest-700: 39 39 42;
+  --c-forest-800: 24 24 27;
+  --c-forest-900: 15 15 17;
+  --c-forest-950: 9 9 11;
+  --c-gold: 212 175 55;
+  --c-gold-light: 240 214 120;
+  --c-gold-dark: 168 137 40;
+  --c-cream: 245 244 242;
+  --c-cream-dark: 231 230 227;
+  --c-palm: 120 120 128;
+  --c-sand: 226 225 222;
+
+  --font-display: var(--font-jost);
+  --font-body: var(--font-jost);
+  --radius-btn: 0.15rem;
+  --heading-spacing: 0.03em;
+  --eyebrow-transform: uppercase;
+  --body-texture: none;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -9,6 +120,18 @@
   body {
     @apply bg-cream text-forest-900 antialiased;
     font-feature-settings: "liga" 1, "calt" 1;
+    background-image: var(--body-texture, none);
+  }
+  .font-serif {
+    letter-spacing: var(--heading-spacing, 0);
+  }
+  /* Smooth the re-skin when switching themes */
+  body,
+  .btn,
+  header,
+  section,
+  footer {
+    transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease;
   }
   ::selection {
     @apply bg-gold/30 text-forest-900;
@@ -31,11 +154,13 @@
   }
 
   .eyebrow {
-    @apply inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.28em] text-gold-dark;
+    @apply inline-flex items-center gap-2 text-xs font-semibold tracking-[0.28em] text-gold-dark;
+    text-transform: var(--eyebrow-transform, uppercase);
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 text-sm font-semibold tracking-wide transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2;
+    @apply inline-flex items-center justify-center gap-2 px-7 py-3 text-sm font-semibold tracking-wide transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2;
+    border-radius: var(--radius-btn, 9999px);
   }
   .btn-gold {
     @apply btn bg-gold-sheen text-forest-900 shadow-gold hover:-translate-y-0.5 hover:shadow-[0_16px_50px_-10px_rgba(200,162,75,0.7)];
