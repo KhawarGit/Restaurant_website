@@ -95,7 +95,7 @@ export async function POST(request: Request) {
   // Attempt automatic send (no-op unless WhatsApp API env vars are configured).
   await sendWhatsApp(message);
 
-  const reference = "CG" + reservation.id.slice(-5).toUpperCase();
+  const reference = "KK" + reservation.id.slice(-5).toUpperCase();
 
   return NextResponse.json({
     ok: true,

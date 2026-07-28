@@ -18,8 +18,15 @@ export async function POST(request: Request) {
   if (!body) return NextResponse.json({ ok: false, error: "Invalid request." }, { status: 400 });
   await hydrate();
 
-  const rating = Math.max(1, Math.min(5, parseInt(body.rating, 10) || 0));
-  if (!rating) return NextResponse.json({ ok: false, errors: { rating: "Please give a rating." } }, { status: 422 });
+  // Validate BEFORE clamping — clamping first would silently turn a missing or
+  // invalid rating into a 1★ review (and falsely trigger the low-score alert).
+  const rating = parseInt(body.rating, 10);
+  if (!Number.isFinite(rating) || rating < 1 || rating > 5) {
+    return NextResponse.json(
+      { ok: false, errors: { rating: "Please give a rating between 1 and 5." } },
+      { status: 422 }
+    );
+  }
 
   const clamp = (v: any) => {
     const n = parseInt(v, 10);

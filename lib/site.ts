@@ -21,9 +21,11 @@ export const site = {
     { days: "Friday – Saturday", time: "12:30 PM – 12:00 AM" },
     { days: "Sunday", time: "6:00 PM – 12:00 AM" },
   ],
+  // Placeholder links — KK Grove is a fictional brand, so these intentionally
+  // don't point anywhere. Swap in real profile URLs for a live deployment.
   social: {
-    instagram: "https://www.instagram.com/cgpakistanofficial/",
-    facebook: "https://www.facebook.com/CoconutGrovePakistan/",
+    instagram: "#",
+    facebook: "#",
   },
   rating: { score: "4.2", count: "2,700+" },
 } as const;
