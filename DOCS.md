@@ -92,7 +92,7 @@ The app auto-selects storage, in this priority order:
 
 | Priority | Backend | When | Behaviour |
 |:---:|---------|------|-----------|
-| 1 | **Supabase (Postgres)** | `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` set | ✅ Durable, real database, shared across all instances |
+| 1 | **Supabase (Postgres)** | `SUPABASE_URL` + `SUPABASE_SECRET_KEY` set | ✅ Durable, real database, shared across all instances |
 | 2 | **Redis** (Upstash/Vercel KV) | Redis env vars set, no Supabase | ✅ Durable, shared across all instances |
 | 3 | **Local file** | dev, nothing configured | Saves to `.data/db.json` |
 | 4 | **In-memory** | Vercel, nothing configured | Works, but **resets on cold starts** (Vercel's FS is read-only) |
@@ -107,19 +107,21 @@ a real free-tier Postgres database.
    of [`supabase/schema.sql`](supabase/schema.sql) from this repo, and click **Run**.
    This creates one table (`kk_store`) that the app reads/writes from.
 3. **Copy your keys**: in your Supabase project, go to
-   **Settings → API** and copy:
+   **Settings → API Keys** and copy:
    - **Project URL** → this is `SUPABASE_URL`
-   - **`service_role` secret** (not the `anon`/`public` key!) → this is `SUPABASE_SERVICE_ROLE_KEY`
+   - **Secret key** (starts with `sb_secret_...` — not the `Publishable` key!) → this is `SUPABASE_SECRET_KEY`
 4. **Add them as env vars** — see [where to add env vars](#where-do-env-vars-go)
    below. Locally: paste into `.env.local`. On Vercel: **Project → Settings →
    Environment Variables**.
 5. **Redeploy** (or restart `npm run dev` locally). The app detects the vars
    and switches to Supabase automatically — no code changes needed.
 
-> ⚠️ `SUPABASE_SERVICE_ROLE_KEY` bypasses Row Level Security and has full
+> ⚠️ `SUPABASE_SECRET_KEY` bypasses Row Level Security and has full
 > read/write access to your project. Keep it a **server-only** env var (never
 > prefix it `NEXT_PUBLIC_`, never commit it) — the app only uses it inside
-> API route handlers, which run server-side.
+> API route handlers, which run server-side. The matching **Publishable key**
+> is safe for browsers but isn't used anywhere in this app (no client-side
+> Supabase calls), so you can ignore it unless you add some later.
 
 ### Alternative: Redis
 
@@ -135,7 +137,7 @@ just skip step with Supabase vars and Redis becomes priority #1 automatically.
 |---|---|
 | Website | `/` |
 | Menu / Order / Feedback | `/menu` · `/order` · `/feedback` |
-| Portfolios | `/portfolios` (Modern, Minimal, Fancy, Bold) |
+| Portfolios | `/portfolios` (9 designs: Modern, Minimal, Fancy, Bold, Izakaya, Speakeasy, Diner, Editorial, Brutalist) |
 | Staff login | `/staff/login` |
 | Manager / Waiter / Chef | `/staff/manager` · `/staff/waiter` · `/staff/chef` |
 | Demo PINs | `1111` · `2222` · `3333` |

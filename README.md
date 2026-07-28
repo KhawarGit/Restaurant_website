@@ -26,7 +26,7 @@ and live manager / waiter / chef dashboards.**
 ## ✨ Highlights
 
 - 🎨 **Design-led marketing site** — animated hero, photo-spotlight interactive menu, gallery, testimonials, and a Google-Maps location.
-- 🖼️ **Design portfolio showcase** (`/portfolios`) — four completely different restaurant website designs (*Modern*, *Minimalistic*, *Fancy*, *Bold*) built with distinct palettes, typography and layouts, to demonstrate range — with a "want this design? Contact Us" CTA on every page.
+- 🖼️ **Design portfolio showcase** (`/portfolios`) — nine completely different restaurant website designs (*Modern, Minimalistic, Fancy, Bold, Neo-Tokyo Izakaya, Prohibition Speakeasy, Retro Diner, Editorial Magazine, Brutalist*) each with its own palette, typography and layout, to demonstrate range — with a "want this design? Contact Us" CTA on every page.
 - 🧠 **Smart table allocation** — a rules engine assigns the best-fit table by party size, seating preference, and availability (with graceful waitlisting).
 - 🛎️ **Omnichannel ordering** — dine-in, takeaway & delivery in a single cart flow with tax and **online or cash payment**.
 - 📊 **Role-based staff console** — live, auto-refreshing dashboards for **Manager**, **Waiter**, and **Chef** (Kitchen Display System).
@@ -119,7 +119,7 @@ Visit `/staff`, then sign in with a demo PIN:
 - **Reservations** — booking form that returns a smart-assigned table (or waitlist) plus a WhatsApp confirmation link.
 - **Order Online** (`/order`) — dine-in / takeaway / delivery, live cart with 13% tax, cash or online payment.
 - **Feedback** (`/feedback`) — star ratings for food, service & ambiance.
-- **Portfolios** (`/portfolios`) — a gallery of four fully self-contained restaurant designs (own fonts, palette, layout, copy — no shared chrome), each proving a different aesthetic: bold/geometric, ultra-minimal, ornate fine-dining, and playful/street-food. A "Contact Us" pill floats on every design page.
+- **Portfolios** (`/portfolios`) — a gallery of nine fully self-contained restaurant designs (own fonts, palette, layout, copy — no shared chrome): bold/geometric, ultra-minimal, ornate fine-dining, playful/street-food, 8-bit neon izakaya, no-photo literary speakeasy, 1950s Americana diner, food-magazine editorial, and raw brutalist. A "Contact Us" pill floats on every design page.
 
 ### Smart table allocation
 `lib/allocate.ts` is a deterministic rules engine that:
@@ -189,7 +189,7 @@ Optional environment variables — copy [`.env.example`](.env.example) to
 ```bash
 # Persistent storage (recommended: Supabase) — see .env.example for full notes
 SUPABASE_URL=https://<project-ref>.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+SUPABASE_SECRET_KEY=sb_secret_your_key_here
 
 # Enable automatic WhatsApp sending (otherwise wa.me links are used)
 WHATSAPP_API_URL=https://graph.facebook.com/v20.0/<phone-id>/messages
@@ -218,7 +218,7 @@ Deploys to **Vercel** out of the box:
 
 > 💾 **For persistent data**, connect **Supabase** (free Postgres): create a
 > project, run [`supabase/schema.sql`](supabase/schema.sql) in its SQL Editor,
-> then add `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` in Vercel → Settings →
+> then add `SUPABASE_URL` + `SUPABASE_SECRET_KEY` in Vercel → Settings →
 > Environment Variables and redeploy. No code changes needed — see
 > [`.env.example`](.env.example) for exact steps. Without it, the app falls
 > back to Redis, then to in-memory storage (fine for a demo, resets on cold starts).
