@@ -1,30 +1,21 @@
 import type { Metadata } from "next";
-import {
-  Playfair_Display,
-  Inter,
-  Cormorant_Garamond,
-  Jost,
-  DM_Serif_Display,
-  Poppins,
-} from "next/font/google";
+import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { SiteChrome } from "@/components/SiteChrome";
-import { THEME_IDS, DEFAULT_THEME } from "@/lib/themes";
 import { site } from "@/lib/site";
 
-const playfair = Playfair_Display({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-playfair", display: "swap" });
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
-const cormorant = Cormorant_Garamond({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-cormorant", display: "swap" });
-const jost = Jost({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-jost", display: "swap" });
-const dmserif = DM_Serif_Display({ subsets: ["latin"], weight: ["400"], variable: "--font-dmserif", display: "swap" });
-const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-poppins", display: "swap" });
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-playfair",
+  display: "swap",
+});
 
-const fontVars = [playfair, inter, cormorant, jost, dmserif, poppins].map((f) => f.variable).join(" ");
-
-// No-flash theme init: applies the saved theme before first paint.
-const themeScript = `(function(){try{var t=sessionStorage.getItem('kk-theme');var ok=${JSON.stringify(
-  THEME_IDS
-)};if(t&&ok.indexOf(t)>-1){document.documentElement.setAttribute('data-theme',t);}}catch(e){}})();`;
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://kkgrove.com"),
@@ -54,10 +45,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" data-theme={DEFAULT_THEME} className={fontVars}>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
+    <html lang="en" className={`${playfair.variable} ${inter.variable}`}>
       <body className="font-sans">
         <SiteChrome>{children}</SiteChrome>
       </body>

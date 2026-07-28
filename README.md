@@ -26,13 +26,13 @@ and live manager / waiter / chef dashboards.**
 ## ✨ Highlights
 
 - 🎨 **Design-led marketing site** — animated hero, photo-spotlight interactive menu, gallery, testimonials, and a Google-Maps location.
-- 🎭 **4 switchable themes** — *Grove*, *Riviera*, *Saffron* & *Onyx* re-skin the entire site (palette + typography) in one click via a top-bar switcher; choice saved to `sessionStorage`.
+- 🖼️ **Design portfolio showcase** (`/portfolios`) — four completely different restaurant website designs (*Modern*, *Minimalistic*, *Fancy*, *Bold*) built with distinct palettes, typography and layouts, to demonstrate range — with a "want this design? Contact Us" CTA on every page.
 - 🧠 **Smart table allocation** — a rules engine assigns the best-fit table by party size, seating preference, and availability (with graceful waitlisting).
 - 🛎️ **Omnichannel ordering** — dine-in, takeaway & delivery in a single cart flow with tax and **online or cash payment**.
 - 📊 **Role-based staff console** — live, auto-refreshing dashboards for **Manager**, **Waiter**, and **Chef** (Kitchen Display System).
 - 💬 **WhatsApp notifications** — every reservation, order, and low rating generates a ready-to-send `wa.me` deep-link for the manager.
 - ⭐ **Customer satisfaction loop** — multi-criteria feedback with automatic manager alerts on low scores.
-- 💾 **Zero-config data layer** — a file-backed store seeds itself; swap for a real DB without changing the API contracts.
+- 💾 **Zero-config data layer** — Supabase (Postgres) when configured, else Redis, else a local file — seeds itself, no code changes required to upgrade.
 
 ---
 
@@ -60,7 +60,7 @@ and live manager / waiter / chef dashboards.**
 | Styling | **Tailwind CSS** + custom design tokens |
 | Fonts | Playfair Display + Inter (`next/font`) |
 | State | React hooks (`useCart`, `usePoll` polling) |
-| Persistence | Upstash/Vercel KV Redis when configured, else local JSON file / in-memory |
+| Persistence | Supabase (Postgres) → Upstash/Vercel KV Redis → local JSON file / in-memory |
 | Auth | Role-based PIN + HTTP-only cookie |
 
 No external UI or database dependencies — everything runs with a single `npm install`.
@@ -119,6 +119,7 @@ Visit `/staff`, then sign in with a demo PIN:
 - **Reservations** — booking form that returns a smart-assigned table (or waitlist) plus a WhatsApp confirmation link.
 - **Order Online** (`/order`) — dine-in / takeaway / delivery, live cart with 13% tax, cash or online payment.
 - **Feedback** (`/feedback`) — star ratings for food, service & ambiance.
+- **Portfolios** (`/portfolios`) — a gallery of four fully self-contained restaurant designs (own fonts, palette, layout, copy — no shared chrome), each proving a different aesthetic: bold/geometric, ultra-minimal, ornate fine-dining, and playful/street-food. A "Contact Us" pill floats on every design page.
 
 ### Smart table allocation
 `lib/allocate.ts` is a deterministic rules engine that:
@@ -141,18 +142,22 @@ app/
 ├── page.tsx              # Home
 ├── about/ menu/ contact/ # Marketing pages
 ├── order/ feedback/      # Online ordering & satisfaction
+├── portfolios/           # Design showcase (index + modern/minimal/fancy/bold)
 ├── staff/                # login, manager, waiter, chef (with role guards)
 └── api/                  # Route handlers (see API reference)
 components/
 ├── sections/             # Marketing sections (Hero, About, Menu, …)
 ├── staff/                # StaffShell + Manager/Waiter/Chef dashboards
+├── portfolio/            # Back/Contact pills shared by design pages
 └── order/                # OrderExperience
 lib/
-├── site.ts menu.ts       # Content & config
-├── types.ts db.ts        # Domain types + file-backed store
-├── allocate.ts notify.ts # Smart seating + WhatsApp
-├── auth.ts               # Role/PIN auth
+├── site.ts menu.ts portfolios.ts  # Content & config
+├── types.ts db.ts supabase.ts     # Domain types + storage layer
+├── allocate.ts notify.ts          # Smart seating + WhatsApp
+├── auth.ts                        # Role/PIN auth
 └── useCart.ts usePoll.ts statusStyles.ts
+supabase/
+└── schema.sql             # Run once in the Supabase SQL Editor
 ```
 
 ---
@@ -178,17 +183,26 @@ lib/
 
 ## ⚙️ Configuration
 
-Optional environment variables (create `.env.local`):
+Optional environment variables — copy [`.env.example`](.env.example) to
+**`.env.local`** in the project root and fill in what you need:
 
 ```bash
+# Persistent storage (recommended: Supabase) — see .env.example for full notes
+SUPABASE_URL=https://<project-ref>.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
 # Enable automatic WhatsApp sending (otherwise wa.me links are used)
 WHATSAPP_API_URL=https://graph.facebook.com/v20.0/<phone-id>/messages
 WHATSAPP_TOKEN=your_token
 ```
 
+`.env.local` is git-ignored — it never gets pushed to GitHub. On Vercel, add
+the same keys under **Project → Settings → Environment Variables** instead.
+
 Editable content lives in plain TypeScript:
 - **Restaurant info** → `lib/site.ts` (name, phone, hours, socials, manager WhatsApp)
 - **Menu, prices, deals** → `lib/menu.ts`
+- **Portfolio designs** → `lib/portfolios.ts` + `app/portfolios/*`
 - **Tables & seating** → `lib/db.ts` (seed)
 - **Staff PINs** → `lib/auth.ts`
 
@@ -202,10 +216,12 @@ Deploys to **Vercel** out of the box:
 2. Import it on [vercel.com](https://vercel.com/new).
 3. Deploy — no configuration needed.
 
-> 💾 **For persistent data**, connect **Upstash for Redis** (Vercel Storage tab →
-> Marketplace → Free plan). It injects `KV_REST_API_URL` / `KV_REST_API_TOKEN` and
-> the app switches to durable Redis automatically — no code changes.
-> Without it, data is in-memory on serverless (fine for a demo, resets on cold starts).
+> 💾 **For persistent data**, connect **Supabase** (free Postgres): create a
+> project, run [`supabase/schema.sql`](supabase/schema.sql) in its SQL Editor,
+> then add `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` in Vercel → Settings →
+> Environment Variables and redeploy. No code changes needed — see
+> [`.env.example`](.env.example) for exact steps. Without it, the app falls
+> back to Redis, then to in-memory storage (fine for a demo, resets on cold starts).
 >
 > 📘 Full step-by-step in **[DOCS.md](DOCS.md)** — dashboards, env vars & deployment.
 

@@ -34,6 +34,7 @@ export const nav = [
   { label: "Menu", href: "/menu" },
   { label: "Order Online", href: "/order" },
   { label: "Reservations", href: "/#reserve" },
+  { label: "Portfolios", href: "/portfolios" },
   { label: "Contact", href: "/contact" },
 ];
 

@@ -65,9 +65,8 @@ This is a standard Next.js 14 app — Vercel needs **zero build configuration**.
    - Build command `next build` and output are set automatically — **leave defaults**.
 
 3. **Add environment variables** *(all optional — the app runs without them)*
-   - For **persistent data**, connect Upstash Redis — see
-     [Data persistence](#-data-persistence--enable-free-redis-recommended) below
-     (it sets `KV_REST_API_URL` / `KV_REST_API_TOKEN` for you).
+   - For **persistent data**, connect Supabase — see
+     [Data persistence](#-data-persistence--connect-supabase-recommended) below.
    - For **auto-WhatsApp**, add `WHATSAPP_API_URL` + `WHATSAPP_TOKEN`.
    - Set them under **Project → Settings → Environment Variables** for the
      **Production** (and optionally Preview) environment, then redeploy.
@@ -75,44 +74,58 @@ This is a standard Next.js 14 app — Vercel needs **zero build configuration**.
 4. **Deploy** — click **Deploy**. Your site goes live at
    `https://<project>.vercel.app`. The dashboards are at `/staff`.
 
-### Where do env vars go?
+### Where do env vars go? {#where-do-env-vars-go}
 
 | Environment | Where to put them |
 |-------------|-------------------|
-| **Local dev** | a file named **`.env.local`** in the project root (copy from `.env.example`). Never commit it — it's git-ignored. |
-| **Vercel (production)** | **Vercel Dashboard → Settings → Environment Variables** — *not* in a committed file. |
+| **Local dev** | Create a file named **`.env.local`** in the project root (same folder as `package.json`) — copy the keys you need from [`.env.example`](.env.example). Never commit it — it's git-ignored. |
+| **Vercel (production)** | **Vercel Dashboard → your project → Settings → Environment Variables** — add each key/value there, *not* in a committed file. |
 
-> `.env.example` is committed as a template. `.env` / `.env.local` are ignored by
-> git (see `.gitignore`) so secrets never reach GitHub.
+> `.env.example` is committed as a template (no real secrets). `.env` / `.env.local`
+> are ignored by git (see `.gitignore`) so your Supabase key never reaches GitHub.
 
 ---
 
-## 💾 Data persistence — enable free Redis (recommended)
+## 💾 Data persistence — connect Supabase (recommended)
 
-The app has **two storage modes**, chosen automatically:
+The app auto-selects storage, in this priority order:
 
-| Mode | When | Behaviour |
-|------|------|-----------|
-| **Local file** | dev, no Redis env vars | Saves to `.data/db.json` |
-| **In-memory** | Vercel, no Redis env vars | Works, but **resets on cold starts** (Vercel's FS is read-only) |
-| **Redis (durable)** | Redis env vars present | ✅ Persists everywhere, shared across all instances |
+| Priority | Backend | When | Behaviour |
+|:---:|---------|------|-----------|
+| 1 | **Supabase (Postgres)** | `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` set | ✅ Durable, real database, shared across all instances |
+| 2 | **Redis** (Upstash/Vercel KV) | Redis env vars set, no Supabase | ✅ Durable, shared across all instances |
+| 3 | **Local file** | dev, nothing configured | Saves to `.data/db.json` |
+| 4 | **In-memory** | Vercel, nothing configured | Works, but **resets on cold starts** (Vercel's FS is read-only) |
 
-For a real deployment, connect **Upstash for Redis** — it has a **free tier**
-(~10k commands/day, 256 MB) and integrates natively with Vercel.
+You only need to configure **one** of these — Supabase is recommended since it's
+a real free-tier Postgres database.
 
-### Enable it (free, ~2 minutes)
+### Enable Supabase (free, ~3 minutes)
 
-1. In your Vercel project, go to the **Storage** tab → **Create Database** →
-   **Upstash for Redis** (in the Marketplace) → pick the **Free** plan.
-   *(Or create one at [upstash.com](https://upstash.com) and copy its REST URL + token.)*
-2. **Connect it to the project.** Vercel automatically injects the
-   `KV_REST_API_URL` and `KV_REST_API_TOKEN` environment variables.
-3. **Redeploy.** That's it — the app detects the vars and switches to Redis. All
-   orders, reservations, tables and feedback now persist durably.
+1. **Create a project** at [supabase.com](https://supabase.com) (free tier).
+2. **Run the schema**: open your project's **SQL Editor**, paste the contents
+   of [`supabase/schema.sql`](supabase/schema.sql) from this repo, and click **Run**.
+   This creates one table (`kk_store`) that the app reads/writes from.
+3. **Copy your keys**: in your Supabase project, go to
+   **Settings → API** and copy:
+   - **Project URL** → this is `SUPABASE_URL`
+   - **`service_role` secret** (not the `anon`/`public` key!) → this is `SUPABASE_SERVICE_ROLE_KEY`
+4. **Add them as env vars** — see [where to add env vars](#where-do-env-vars-go)
+   below. Locally: paste into `.env.local`. On Vercel: **Project → Settings →
+   Environment Variables**.
+5. **Redeploy** (or restart `npm run dev` locally). The app detects the vars
+   and switches to Supabase automatically — no code changes needed.
 
-> No code changes needed. The switch is handled in [`lib/db.ts`](lib/db.ts),
-> which reads either `KV_REST_API_*` (Vercel) or `UPSTASH_REDIS_REST_*` (Upstash
-> direct). To test durability locally, put the same vars in `.env.local`.
+> ⚠️ `SUPABASE_SERVICE_ROLE_KEY` bypasses Row Level Security and has full
+> read/write access to your project. Keep it a **server-only** env var (never
+> prefix it `NEXT_PUBLIC_`, never commit it) — the app only uses it inside
+> API route handlers, which run server-side.
+
+### Alternative: Redis
+
+If you'd rather use Upstash/Vercel KV instead, see the `KV_REST_API_URL` /
+`KV_REST_API_TOKEN` section in [`.env.example`](.env.example) — same idea,
+just skip step with Supabase vars and Redis becomes priority #1 automatically.
 
 ---
 
@@ -122,9 +135,11 @@ For a real deployment, connect **Upstash for Redis** — it has a **free tier**
 |---|---|
 | Website | `/` |
 | Menu / Order / Feedback | `/menu` · `/order` · `/feedback` |
+| Portfolios | `/portfolios` (Modern, Minimal, Fancy, Bold) |
 | Staff login | `/staff/login` |
 | Manager / Waiter / Chef | `/staff/manager` · `/staff/waiter` · `/staff/chef` |
 | Demo PINs | `1111` · `2222` · `3333` |
 | Edit PINs | `lib/auth.ts` |
 | Edit content/menu | `lib/site.ts` · `lib/menu.ts` |
-| Env template | `.env.example` |
+| Supabase schema | `supabase/schema.sql` |
+| Env template (local: copy to `.env.local`) | `.env.example` |

@@ -25,7 +25,11 @@ export function BuildCTA() {
             online ordering, reservations, dashboards and more. Let's build yours.
           </p>
           <p className="mt-2 text-sm text-gold/80">
-            Tip: try the theme switcher up top — every design here is one click away.
+            Tip: this is just one style — see{" "}
+            <Link href="/portfolios" className="underline underline-offset-2 hover:text-gold">
+              other designs I've built
+            </Link>
+            .
           </p>
         </div>
         <div className="flex shrink-0 flex-col gap-3 sm:flex-row">

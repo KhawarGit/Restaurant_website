@@ -16,7 +16,7 @@ export function PageBanner({
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: `linear-gradient(rgb(var(--c-forest-950) / 0.75), rgb(var(--c-forest-950) / 0.9)), url('${image}')`,
+          backgroundImage: `linear-gradient(rgba(4,26,20,0.75), rgba(4,26,20,0.9)), url('${image}')`,
         }}
       />
       <div className="container-x relative">

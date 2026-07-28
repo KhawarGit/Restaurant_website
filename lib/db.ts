@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { Redis } from "@upstash/redis";
+import { getSupabase } from "./supabase";
 import type {
   DB,
   Table,
@@ -13,6 +14,8 @@ import type {
 const DATA_DIR = path.join(process.cwd(), ".data");
 const DB_FILE = path.join(DATA_DIR, "db.json");
 const REDIS_KEY = "kk:db";
+const SUPABASE_TABLE = "kk_store";
+const SUPABASE_ROW_ID = "main";
 
 function seed(): DB {
   const tables: Table[] = [
@@ -33,9 +36,9 @@ function seed(): DB {
 // Cache across hot-reloads / warm invocations via globalThis.
 const g = globalThis as unknown as { __kkdb?: DB; __kkredis?: Redis | null };
 
-// ---- Storage backend selection ------------------------------------------
-// Uses Upstash/Vercel KV Redis when the REST env vars are present; otherwise
-// falls back to a local JSON file (dev) / in-memory (read-only filesystems).
+// ---- Storage backend selection -------------------------------------------
+// Priority: Supabase (Postgres, durable) > Upstash/Vercel KV Redis (durable) >
+// local JSON file (dev) / in-memory (read-only serverless filesystems).
 function getRedis(): Redis | null {
   if (g.__kkredis !== undefined) return g.__kkredis;
   const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
@@ -74,6 +77,22 @@ function filePersist() {
 // ---- Public storage boundary --------------------------------------------
 /** Load the latest state into memory. Call once at the top of each request. */
 export async function hydrate(): Promise<DB> {
+  const supabase = getSupabase();
+  if (supabase) {
+    const { data, error } = await supabase
+      .from(SUPABASE_TABLE)
+      .select("data")
+      .eq("id", SUPABASE_ROW_ID)
+      .maybeSingle();
+    if (!error && data?.data) {
+      g.__kkdb = data.data as DB;
+    } else {
+      g.__kkdb = seed();
+      await supabase.from(SUPABASE_TABLE).upsert({ id: SUPABASE_ROW_ID, data: g.__kkdb });
+    }
+    return g.__kkdb!;
+  }
+
   const redis = getRedis();
   if (redis) {
     const data = (await redis.get<DB>(REDIS_KEY)) ?? null;
@@ -85,16 +104,28 @@ export async function hydrate(): Promise<DB> {
     }
     return g.__kkdb!;
   }
+
   return fileLoad();
 }
 
 /** Persist the current in-memory state. Call after any mutation. */
 export async function flush(): Promise<void> {
+  const supabase = getSupabase();
+  if (supabase) {
+    await supabase.from(SUPABASE_TABLE).upsert({
+      id: SUPABASE_ROW_ID,
+      data: g.__kkdb,
+      updated_at: new Date().toISOString(),
+    });
+    return;
+  }
+
   const redis = getRedis();
   if (redis) {
     await redis.set(REDIS_KEY, g.__kkdb);
     return;
   }
+
   filePersist();
 }
 
@@ -105,7 +136,7 @@ export function db(): DB {
 
 /** Sync local persist used by the mutation helpers (no-op-safe on serverless). */
 export function commit() {
-  if (!getRedis()) filePersist();
+  if (!getSupabase() && !getRedis()) filePersist();
 }
 
 export const uid = (p = "") =>

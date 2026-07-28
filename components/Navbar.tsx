@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { nav, site } from "@/lib/site";
 import { Logo } from "./Logo";
 import { Phone, Lock } from "./Icons";
-import { ThemeSwitcher } from "./theme/ThemeSwitcher";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -51,7 +50,6 @@ export function Navbar() {
         </ul>
 
         <div className="hidden items-center gap-4 lg:flex">
-          <ThemeSwitcher />
           <a href={site.phoneHref} className="hidden items-center gap-2 text-sm font-semibold text-forest-800 xl:flex">
             <Phone className="h-4 w-4 text-gold-dark" />
             {site.phone}
@@ -105,10 +103,6 @@ export function Navbar() {
           ))}
         </ul>
         <div className="mt-8 space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm uppercase tracking-widest text-cream/50">Design</span>
-            <ThemeSwitcher variant="dark" />
-          </div>
           <a href={site.phoneHref} className="flex items-center gap-2 text-cream/80">
             <Phone className="h-5 w-5 text-gold" /> {site.phone}
           </a>

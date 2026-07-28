@@ -10,8 +10,9 @@ import { BuildCTA } from "./BuildCTA";
 export function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isStaff = pathname?.startsWith("/staff");
+  const isPortfolio = pathname?.startsWith("/portfolios");
 
-  if (isStaff) return <>{children}</>;
+  if (isStaff || isPortfolio) return <>{children}</>;
 
   return (
     <>
